@@ -1,0 +1,224 @@
+{
+  "name": "IP Reputation Checker",
+  "nodes": [
+    {
+      "parameters": {
+        "url": "https://api.abuseipdb.com/api/v2/check",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "ipAddress",
+              "value": "={{ $json.ip }}"
+            },
+            {
+              "name": "maxAgeInDays",
+              "value": "90"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Key",
+              "value": "a6b14050a85da08b5c59df70f8074e7e48a0c75ee64ca89567ca031005e41be00cf944556d8897fe"
+            },
+            {
+              "name": "Accept",
+              "value": "application/json"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        496,
+        0
+      ],
+      "id": "6f037daa-864e-4e2f-9eb9-4501dada3e4a",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "86532040-970a-4118-9207-617de1f02536",
+              "leftValue": "={{ $json.data.abuseConfidenceScore }}",
+              "rightValue": 50,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        720,
+        0
+      ],
+      "id": "221447a1-c07f-4570-a31a-6f0367323172",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "60e5c1be-de7b-4170-a77f-5bfc290f2076",
+              "name": "result",
+              "value": "=⚠️ MALICIOUS - Score: {{ $json.data.abuseConfidenceScore }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        944,
+        -144
+      ],
+      "id": "029ec10c-1681-4d67-9a1f-89af6c9ffb94",
+      "name": "Malicious Alert"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "78620f2e-61ca-427a-b61c-51ca94ec7cf2",
+              "name": "result",
+              "value": "=✅ Clean - Score: {{ $json.data.abuseConfidenceScore }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        944,
+        144
+      ],
+      "id": "02cc2790-b1a0-47e8-b739-ee8fea0ddeee",
+      "name": "Clean"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "fbdb26c0-8f62-4441-bbf0-e7237ba96f0d",
+      "name": "When Clicking 'Execute workflow'"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "817ddf3b-6408-4876-828a-a955732274c2",
+              "name": "ip",
+              "value": "192.42.116.16",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        272,
+        0
+      ],
+      "id": "d1b7d8a0-59d6-4e9a-9a39-8666c554e6e6",
+      "name": "Set Target IP"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Malicious Alert",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Clean",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When Clicking 'Execute workflow'": {
+      "main": [
+        [
+          {
+            "node": "Set Target IP",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Target IP": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "d1e98889-dbeb-48ce-843b-584004606c63",
+  "meta": {
+    "instanceId": "40a7a3bdfb39c0fa8d94d93ea2ae4a0414cc302d53834ccd29fb82b7e29a35d1"
+  },
+  "nodeGroups": [],
+  "id": "hZEeeNFMlS98ZcmN",
+  "tags": []
+}
